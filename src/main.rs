@@ -1,6 +1,11 @@
-use serde::Deserialize;
+use axum::extract::State;
+use axum::routing::{get, post};
+use axum::{Json, Router};
+use dotenvy::dotenv;
+use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::error::Error;
+//use validator::{Validate, ValidationError};
 
 // get countries
 #[derive(Deserialize, Clone)]
@@ -112,7 +117,30 @@ async fn health_check() -> Json<GenericResponse> {
 }
 
 #[tokio::main]
-async fn main() {}
+async fn main() {
+    // Load env
+    dotenv().ok();
+
+    // Load List of Countries implementing measures according to the Nagoya Protocol
+    let implementing_countries = get_implementing_countries().unwrap();
+
+    let server_address = dotenvy::var("SERVER_HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
+    let service_port = dotenvy::var("SERVER_PORT")
+        .unwrap_or_else(|_| "3000".to_string())
+        .parse::<u16>()
+        .expect("Please select a valid port number of between 0 and 65535");
+
+    let listener = tokio::net::TcpListener::bind(format!("{}:{}", server_address, service_port))
+        .await
+        .unwrap();
+
+    let app = Router::new()
+        .route("/nagoya_check", post(nagoya_check_wrapper))
+        .route("/health", get(health_check))
+        .with_state(implementing_countries);
+
+    axum::serve(listener, app).await.unwrap();
+}
 
 #[cfg(test)]
 mod tests {
