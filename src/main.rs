@@ -74,7 +74,7 @@ async fn is_probe_in_implementing_country(
 /// returns: Result<bool, Box<dyn Error, Global>>
 ///
 async fn are_affils_from_probe_country(
-    affils: HashSet<&str>,
+    affils: &HashSet<String>,
     probe_country: &str,
 ) -> Result<bool, Box<dyn Error>> {
     // Check whether someone is from the country of the probe's origin.
@@ -149,25 +149,25 @@ mod tests {
 
     #[tokio::test]
     async fn test_are_affils_from_probe_country() {
-        let data_included = HashSet::from_iter(vec!["AUS", "DEU"]);
-        let data_not_included: HashSet<&str> = HashSet::from_iter(vec!["DEU"]);
-        let data_empty: HashSet<&str> = HashSet::from_iter(vec![""]);
+        let data_included = HashSet::from_iter(vec!["AUS".to_string(), "DEU".to_string()]);
+        let data_not_included = HashSet::from_iter(vec!["DEU".to_string()]);
+        let data_empty = HashSet::from_iter(vec!["".to_string()]);
         let probe: &str = "AUS";
 
         assert_eq!(
-            are_affils_from_probe_country(data_included, &probe)
+            are_affils_from_probe_country(&data_included, &probe)
                 .await
                 .unwrap(),
             true
         );
         assert_eq!(
-            are_affils_from_probe_country(data_not_included, &probe)
+            are_affils_from_probe_country(&data_not_included, &probe)
                 .await
                 .unwrap(),
             false
         );
         assert_eq!(
-            are_affils_from_probe_country(data_empty, &probe)
+            are_affils_from_probe_country(&data_empty, &probe)
                 .await
                 .unwrap(),
             false
