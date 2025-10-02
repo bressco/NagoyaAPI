@@ -50,3 +50,94 @@ async fn are_affils_from_probe_country(
     Ok(affils.contains(probe_country))
 }
 
+// async fn nagoya_check(
+//     Json(payload): Json<NagoyaCheckData>,
+// ) -> Result<String, (StatusCode, String)> {}
+// // get affils (via API)
+// // get country of origin of the probes (API)
+//
+// // Check whether country of origin is in list of implementing countries (separate func)
+// // Check whether affils match origin country
+//
+// // Set up API
+// pub fn create_router() -> Router {
+//     Router::new().route("/check", post(nagoya_check))
+// }
+//
+#[tokio::main]
+async fn main() {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashSet;
+
+    #[tokio::test]
+    async fn test_are_affils_from_probe_country() {
+        let data_included = HashSet::from_iter(vec!["AUS", "DEU"]);
+        let data_not_included: HashSet<&str> = HashSet::from_iter(vec!["DEU"]);
+        let data_empty: HashSet<&str> = HashSet::from_iter(vec![""]);
+        let probe: &str = "AUS";
+
+        assert_eq!(
+            are_affils_from_probe_country(data_included, &probe)
+                .await
+                .unwrap(),
+            true
+        );
+        assert_eq!(
+            are_affils_from_probe_country(data_not_included, &probe)
+                .await
+                .unwrap(),
+            false
+        );
+        assert_eq!(
+            are_affils_from_probe_country(data_empty, &probe)
+                .await
+                .unwrap(),
+            false
+        );
+    }
+
+    #[tokio::test]
+    async fn test_probe_in_implementing_country() {
+        let data_included = ImplementingCountries {
+            countries: HashSet::from_iter(vec![String::from("DEU"), String::from("AUS")]),
+        };
+        let data_included_single = ImplementingCountries {
+            countries: HashSet::from_iter(vec![String::from("DEU")]),
+        };
+        let data_not_included = ImplementingCountries {
+            countries: HashSet::from_iter(vec![String::from("AFG")]),
+        };
+        let data_empty = ImplementingCountries {
+            countries: HashSet::new(),
+        };
+        let probe = "DEU";
+
+        assert_eq!(
+            is_probe_in_implementing_country(&data_included, &probe)
+                .await
+                .unwrap(),
+            true
+        );
+        assert_eq!(
+            is_probe_in_implementing_country(&data_included_single, &probe)
+                .await
+                .unwrap(),
+            true
+        );
+        assert_eq!(
+            is_probe_in_implementing_country(&data_not_included, &probe)
+                .await
+                .unwrap(),
+            false
+        );
+        assert_eq!(
+            is_probe_in_implementing_country(&data_empty, &probe)
+                .await
+                .unwrap(),
+            false
+        );
+    }
+}
