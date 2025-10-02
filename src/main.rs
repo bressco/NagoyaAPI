@@ -50,20 +50,40 @@ async fn are_affils_from_probe_country(
     Ok(affils.contains(probe_country))
 }
 
-// async fn nagoya_check(
-//     Json(payload): Json<NagoyaCheckData>,
-// ) -> Result<String, (StatusCode, String)> {}
-// // get affils (via API)
-// // get country of origin of the probes (API)
-//
-// // Check whether country of origin is in list of implementing countries (separate func)
-// // Check whether affils match origin country
-//
-// // Set up API
-// pub fn create_router() -> Router {
-//     Router::new().route("/check", post(nagoya_check))
-// }
-//
+async fn nagoya_check(
+    Json(payload): Json<NagoyaCheckData>,
+    implementing_countries: ImplementingCountries,
+) -> Json<NagoyaResponse> {
+    let probe_bool: bool =
+        is_probe_in_implementing_country(&implementing_countries, &payload.probe_country)
+            .await
+            .unwrap();
+    let affils_bool: bool =
+        are_affils_from_probe_country(&payload.researcher_affils, &payload.probe_country)
+            .await
+            .unwrap();
+
+    Json(NagoyaResponse {
+        message: probe_bool & affils_bool,
+        status_code: 200,
+    })
+}
+
+// Wrapper to ease testing of the main functionality
+async fn nagoya_check_wrapper(
+    State(implementing_countries): State<ImplementingCountries>,
+    Json(payload): Json<NagoyaCheckData>,
+) -> Json<NagoyaResponse> {
+    nagoya_check(Json(payload), implementing_countries).await
+}
+
+async fn health_check() -> Json<GenericResponse> {
+    Json(GenericResponse {
+        message: String::from("NagoyaAPI is running"),
+        status_code: 200,
+    })
+}
+
 #[tokio::main]
 async fn main() {}
 
