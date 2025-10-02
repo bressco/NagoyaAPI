@@ -3,9 +3,36 @@ use std::collections::HashSet;
 use std::error::Error;
 
 // get countries
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 struct ImplementingCountries {
     countries: HashSet<String>,
+}
+
+#[derive(Deserialize)]
+struct NagoyaCheckData {
+    // TODO: Use enum instead of string? E.g. crate iso3166
+    // TODO: Use additional validation
+    researcher_affils: HashSet<String>,
+    //#[validate(length(min = 3, max = 3))]
+    probe_country: String,
+}
+
+#[derive(Serialize)]
+struct NagoyaResponse {
+    message: bool,
+    status_code: u16,
+}
+
+#[derive(Serialize)]
+struct GenericResponse {
+    message: String,
+    status_code: u16,
+}
+
+fn get_implementing_countries() -> Result<ImplementingCountries, Box<dyn Error>> {
+    let v: ImplementingCountries =
+        serde_json::from_str(include_str!("../assets/nagoya_countries.json"))?;
+    Ok(v)
 }
 
 /// Checks whether the probe is from a country implementing Nagoya Measures. If so, the Result
