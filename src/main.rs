@@ -31,3 +31,22 @@ async fn is_probe_in_implementing_country(
     Ok(implementing_countries.countries.contains(probe_country))
 }
 
+/// Checks whether at least one of the researchers is from the same country as the probe.
+/// Result contains true, if at least one of the researchers is from the country of the probe.
+///
+/// # Arguments
+///
+/// * `affils`: Country Affiliations of the researchers
+/// * `probe_country`: Country from where the probe was or is to be extracted
+///
+/// returns: Result<bool, Box<dyn Error, Global>>
+///
+async fn are_affils_from_probe_country(
+    affils: HashSet<&str>,
+    probe_country: &str,
+) -> Result<bool, Box<dyn Error>> {
+    // Check whether someone is from the country of the probe's origin.
+    // Substract the country from the HS and compare length
+    Ok(affils.contains(probe_country))
+}
+
