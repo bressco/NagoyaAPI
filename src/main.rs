@@ -1,15 +1,19 @@
-use axum::extract::State;
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use dotenvy::dotenv;
-use models::{GenericResponse, ImplementingCountries, NagoyaCheckData, NagoyaResponse};
+use models::{ImplementingCountries, NagoyaCheckData, NagoyaResponse};
 use std::collections::HashSet;
 use std::error::Error;
 use utoipa::OpenApi;
 
 #[derive(OpenApi)]
-#[openapi(paths(openapi, nagoya_check, health_check))]
+#[openapi(paths(
+    handlers::openapi,
+    handlers::nagoya_check_wrapper,
+    handlers::health_check
+))]
 pub struct ApiDoc;
+mod handlers;
 mod models;
 //use utoipa_swagger_ui;
 //use validator::{Validate, ValidationError};
@@ -25,7 +29,7 @@ fn get_implementing_countries() -> Result<ImplementingCountries, Box<dyn Error>>
 ///
 /// # Arguments
 ///
-/// * `implementing_countries`: Countries implementing Nagoya measures.
+/// * `implementi pub(crate)ng_countries`: Countries implementing Nagoya measures.
 /// * `probe_country`: Country from where the probe was or is to be extracted
 ///
 /// returns: Result<bool, Box<dyn Error, Global>>
@@ -62,13 +66,6 @@ async fn are_affils_from_probe_country(
     Ok(affils.contains(probe_country))
 }
 
-#[utoipa::path(
-    post,
-    path = "/nagoya_check",
-    responses(
-    (status = 200, description = "Result of the compliance check", body = NagoyaResponse)
-    )
-)]
 async fn nagoya_check(
     Json(payload): Json<NagoyaCheckData>,
     implementing_countries: ImplementingCountries,
@@ -86,39 +83,6 @@ async fn nagoya_check(
         check_result: probe_bool & affils_bool,
         status_code: 200,
     })
-}
-
-// Wrapper to ease testing of the main functionality
-async fn nagoya_check_wrapper(
-    State(implementing_countries): State<ImplementingCountries>,
-    Json(payload): Json<NagoyaCheckData>,
-) -> Json<NagoyaResponse> {
-    nagoya_check(Json(payload), implementing_countries).await
-}
-
-#[utoipa::path(
-    get,
-    path = "/health",
-    responses(
-        (status = 200, description ="JSON file", body=GenericResponse)
-    )
-)]
-async fn health_check() -> Json<GenericResponse> {
-    Json(GenericResponse {
-        message: String::from("NagoyaAPI is running"),
-        status_code: 200,
-    })
-}
-
-#[utoipa::path(
-    get,
-    path = "/openapi.json",
-    responses(
-        (status = 200, description ="JSON file", body=())
-    )
-)]
-async fn openapi() -> Json<utoipa::openapi::OpenApi> {
-    Json(ApiDoc::openapi())
 }
 
 #[tokio::main]
@@ -140,9 +104,9 @@ async fn main() {
         .unwrap();
 
     let app = Router::new()
-        .route("/nagoya_check", post(nagoya_check_wrapper))
-        .route("/openapi.json", get(openapi))
-        .route("/health", get(health_check))
+        .route("/nagoya_check", post(handlers::nagoya_check_wrapper))
+        .route("/openapi.json", get(handlers::openapi))
+        .route("/health", get(handlers::health_check))
         //.merge(utoipa_swagger_ui::SwaggerUi::new("/swagger-ui").url("/openapi.json", ApiDoc::openapi()))
         .with_state(implementing_countries);
 
