@@ -1,11 +1,10 @@
 use axum::Router;
 use axum::routing::{get, post};
 use dotenvy::dotenv;
-use models::ImplementingCountries;
-use std::error::Error;
 use utoipa::OpenApi;
 
 mod handlers;
+mod helpers;
 mod models;
 mod nagoya_check;
 
@@ -17,19 +16,13 @@ mod nagoya_check;
 ))]
 pub struct ApiDoc;
 
-fn get_implementing_countries() -> Result<ImplementingCountries, Box<dyn Error>> {
-    let v: ImplementingCountries =
-        serde_json::from_str(include_str!("../assets/nagoya_countries.json"))?;
-    Ok(v)
-}
-
 #[tokio::main]
 async fn main() {
     // Load env
     dotenv().ok();
 
     // Load List of Countries implementing measures according to the Nagoya Protocol
-    let implementing_countries = get_implementing_countries().unwrap();
+    let implementing_countries = helpers::get_implementing_countries().unwrap();
 
     let server_address = dotenvy::var("SERVER_HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
     let service_port = dotenvy::var("SERVER_PORT")
@@ -53,7 +46,7 @@ async fn main() {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::models::ImplementingCountries;
     use crate::nagoya_check::{are_affils_from_probe_country, is_probe_in_implementing_country};
     use std::collections::HashSet;
 
