@@ -2,44 +2,17 @@ use axum::extract::State;
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use dotenvy::dotenv;
-use serde::{Deserialize, Serialize};
+use models::{GenericResponse, ImplementingCountries, NagoyaCheckData, NagoyaResponse};
 use std::collections::HashSet;
 use std::error::Error;
-use utoipa::{IntoParams, IntoResponses, OpenApi, ToSchema};
-//use utoipa_swagger_ui;
-//use validator::{Validate, ValidationError};
+use utoipa::OpenApi;
 
 #[derive(OpenApi)]
 #[openapi(paths(openapi, nagoya_check, health_check))]
-struct ApiDoc;
-// get countries
-#[derive(Deserialize, Clone)]
-struct ImplementingCountries {
-    countries: HashSet<String>,
-}
-
-#[derive(Deserialize, IntoParams)]
-struct NagoyaCheckData {
-    // TODO: Use enum instead of string? E.g. crate iso3166
-    // TODO: Use additional validation
-    researcher_affils: HashSet<String>,
-    //#[validate(length(min = 3, max = 3))]
-    probe_country: String,
-}
-
-#[derive(Serialize, IntoResponses, ToSchema)]
-#[response(status = 200)]
-struct NagoyaResponse {
-    check_result: bool,
-    status_code: u16,
-}
-
-#[derive(Serialize, IntoResponses, ToSchema)]
-#[response(status = 200)]
-struct GenericResponse {
-    message: String,
-    status_code: u16,
-}
+pub struct ApiDoc;
+mod models;
+//use utoipa_swagger_ui;
+//use validator::{Validate, ValidationError};
 
 fn get_implementing_countries() -> Result<ImplementingCountries, Box<dyn Error>> {
     let v: ImplementingCountries =
