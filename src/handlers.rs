@@ -16,7 +16,7 @@ pub async fn nagoya_check_wrapper(
     State(implementing_countries): State<ImplementingCountries>,
     Json(payload): Json<NagoyaCheckData>,
 ) -> Json<NagoyaResponse> {
-    crate::nagoya_check(Json(payload), implementing_countries).await
+    crate::nagoya_check::nagoya_check(Json(payload), implementing_countries).await
 }
 
 #[utoipa::path(
