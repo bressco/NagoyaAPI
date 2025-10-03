@@ -5,15 +5,20 @@ use dotenvy::dotenv;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::error::Error;
+use utoipa::{IntoParams, OpenApi};
+use utoipa_swagger_ui;
 //use validator::{Validate, ValidationError};
 
+#[derive(OpenApi)]
+#[openapi(paths(openapi))]
+struct ApiDoc;
 // get countries
 #[derive(Deserialize, Clone)]
 struct ImplementingCountries {
     countries: HashSet<String>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, IntoParams)]
 struct NagoyaCheckData {
     // TODO: Use enum instead of string? E.g. crate iso3166
     // TODO: Use additional validation
@@ -116,6 +121,17 @@ async fn health_check() -> Json<GenericResponse> {
     })
 }
 
+#[utoipa::path(
+    get,
+    path = "/openapi.json",
+    responses(
+        (status = 200, description ="JSON file", body=())
+    )
+)]
+async fn openapi() -> Json<utoipa::openapi::OpenApi> {
+    Json(ApiDoc::openapi())
+}
+
 #[tokio::main]
 async fn main() {
     // Load env
@@ -136,6 +152,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/nagoya_check", post(nagoya_check_wrapper))
+        .route("/openapi.json", get(openapi))
         .route("/health", get(health_check))
         .with_state(implementing_countries);
 
