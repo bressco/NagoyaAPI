@@ -5,12 +5,12 @@ use dotenvy::dotenv;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::error::Error;
-use utoipa::{IntoParams, OpenApi};
-use utoipa_swagger_ui;
+use utoipa::{IntoParams, IntoResponses, OpenApi, ToSchema};
+//use utoipa_swagger_ui;
 //use validator::{Validate, ValidationError};
 
 #[derive(OpenApi)]
-#[openapi(paths(openapi))]
+#[openapi(paths(openapi, nagoya_check, health_check))]
 struct ApiDoc;
 // get countries
 #[derive(Deserialize, Clone)]
@@ -27,13 +27,15 @@ struct NagoyaCheckData {
     probe_country: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, IntoResponses, ToSchema)]
+#[response(status = 200)]
 struct NagoyaResponse {
-    message: bool,
+    check_result: bool,
     status_code: u16,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, IntoResponses, ToSchema)]
+#[response(status = 200)]
 struct GenericResponse {
     message: String,
     status_code: u16,
@@ -87,6 +89,13 @@ async fn are_affils_from_probe_country(
     Ok(affils.contains(probe_country))
 }
 
+#[utoipa::path(
+    post,
+    path = "/nagoya_check",
+    responses(
+    (status = 200, description = "Result of the compliance check", body = NagoyaResponse)
+    )
+)]
 async fn nagoya_check(
     Json(payload): Json<NagoyaCheckData>,
     implementing_countries: ImplementingCountries,
@@ -101,7 +110,7 @@ async fn nagoya_check(
             .unwrap();
 
     Json(NagoyaResponse {
-        message: probe_bool & affils_bool,
+        check_result: probe_bool & affils_bool,
         status_code: 200,
     })
 }
@@ -114,6 +123,13 @@ async fn nagoya_check_wrapper(
     nagoya_check(Json(payload), implementing_countries).await
 }
 
+#[utoipa::path(
+    get,
+    path = "/health",
+    responses(
+        (status = 200, description ="JSON file", body=GenericResponse)
+    )
+)]
 async fn health_check() -> Json<GenericResponse> {
     Json(GenericResponse {
         message: String::from("NagoyaAPI is running"),
@@ -154,6 +170,7 @@ async fn main() {
         .route("/nagoya_check", post(nagoya_check_wrapper))
         .route("/openapi.json", get(openapi))
         .route("/health", get(health_check))
+        //.merge(utoipa_swagger_ui::SwaggerUi::new("/swagger-ui").url("/openapi.json", ApiDoc::openapi()))
         .with_state(implementing_countries);
 
     axum::serve(listener, app).await.unwrap();
