@@ -38,7 +38,7 @@ fn fetch_absch_treaty_info() -> String {
 }
 
 fn get_nagoya_treaty_info(absch_json: &str) -> Result<HashSet<NagoyaCountryInfo>, Box<dyn Error>> {
-    let v: HashSet<NagoyaCountryInfo> = serde_json::from_str(&absch_json)?;
+    let v: HashSet<NagoyaCountryInfo> = serde_json::from_str(absch_json)?;
     Ok(v)
 }
 
