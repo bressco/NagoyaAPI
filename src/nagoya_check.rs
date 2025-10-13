@@ -71,23 +71,20 @@ async fn test_are_affils_from_probe_country() {
     let data_empty = HashSet::from_iter(vec!["".to_string()]);
     let probe: &str = "AUS";
 
-    assert_eq!(
+    assert!(
         are_affils_from_probe_country(&data_included, &probe)
             .await
             .unwrap(),
-        true
     );
-    assert_eq!(
-        are_affils_from_probe_country(&data_not_included, &probe)
+    assert!(
+        !are_affils_from_probe_country(&data_not_included, &probe)
             .await
             .unwrap(),
-        false
     );
-    assert_eq!(
-        are_affils_from_probe_country(&data_empty, &probe)
+    assert!(
+        !are_affils_from_probe_country(&data_empty, &probe)
             .await
-            .unwrap(),
-        false
+            .unwrap()
     );
 }
 
@@ -107,28 +104,24 @@ async fn test_probe_in_implementing_country() {
     };
     let probe = "DEU";
 
-    assert_eq!(
+    assert!(
         is_probe_in_implementing_country(&data_included, &probe)
             .await
-            .unwrap(),
-        true
+            .unwrap()
     );
-    assert_eq!(
+    assert!(
         is_probe_in_implementing_country(&data_included_single, &probe)
             .await
-            .unwrap(),
-        true
+            .unwrap()
     );
-    assert_eq!(
+    assert!(
         is_probe_in_implementing_country(&data_not_included, &probe)
             .await
-            .unwrap(),
-        false
+            .unwrap()
     );
-    assert_eq!(
-        is_probe_in_implementing_country(&data_empty, &probe)
+    assert!(
+        !is_probe_in_implementing_country(&data_empty, &probe)
             .await
-            .unwrap(),
-        false
+            .unwrap()
     );
 }
