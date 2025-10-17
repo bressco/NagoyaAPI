@@ -115,7 +115,7 @@ async fn test_probe_in_implementing_country() {
             .unwrap()
     );
     assert!(
-        is_probe_in_implementing_country(&data_not_included, &probe)
+        !is_probe_in_implementing_country(&data_not_included, &probe)
             .await
             .unwrap()
     );
