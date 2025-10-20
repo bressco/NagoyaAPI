@@ -10,4 +10,4 @@ axum = { version = "0.8.4", features = ["multipart"] }
 tokio = { version = "1", features = ["full"] }
 dotenvy = "0.15.7"
 utoipa = "5.4.0"
-reqwest = { version = "0.12.23", features = ["blocking", "json"] }
+reqwest = { version = "0.12.24", features = ["blocking", "json"] }
