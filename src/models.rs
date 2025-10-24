@@ -31,10 +31,7 @@ pub struct ImplementingCountries {
 
 #[derive(Deserialize, IntoParams)]
 pub struct NagoyaCheckData {
-    // TODO: Use enum instead of string? E.g. crate iso3166
     // TODO: Use additional validation
-    pub(crate) researcher_affils: HashSet<String>,
-    //#[validate(length(min = 3, max = 3))]
     pub(crate) probe_country: String,
 }
 
