@@ -2,31 +2,29 @@ use crate::models::{ImplementingCountries, NagoyaCountryInfo};
 use std::collections::HashSet;
 use std::error::Error;
 
-fn fetch_absch_treaty_info() -> String {
+async fn fetch_absch_treaty_info() -> String {
     // Creates a new client on each call. As this call should happen rarely due to caching, this
     // should be ok
     // Just gets the json
-    let absch_json = reqwest::blocking::get("https://api.cbd.int/api/v2013/countries/");
+    let absch_json = reqwest::get("https://api.cbd.int/api/v2013/countries/").await;
 
     // Error handling here instead of passing
 
     match absch_json {
         Ok(x) => {
             match x.error_for_status() {
-                Ok(x) => {
-                    x.text().unwrap();
-                }
+                Ok(x) => x.text().await.unwrap(),
                 // Error on server side
                 Err(e) => {
                     // TODO: Handle this cleaner
-                    eprintln!("Server returned an error: {}", e.status().unwrap())
+                    panic!("Server returned an error: {}", e.status().unwrap())
                 }
             }
         }
         // Error if for different reasons a connection cannot be established
         // TODO: Act differently based on server error, e.g. try again with temp errors
         Err(e) => {
-            eprintln!("Could not fetch data from ABSCH: {}", e)
+            panic!("Could not fetch data from ABSCH: {}", e)
         }
     }
 
@@ -34,7 +32,6 @@ fn fetch_absch_treaty_info() -> String {
     // If a cache is used, that could be used instead, also to steer the retry time by resetting
     // the stale "timer". But for now this should be enough
     // At least, if the fetching fails repeatedly, maybe configurable in .env
-    panic!("Could not fetch data from ABSCH");
 }
 
 fn get_nagoya_treaty_info(absch_json: &str) -> Result<HashSet<NagoyaCountryInfo>, Box<dyn Error>> {
@@ -42,12 +39,12 @@ fn get_nagoya_treaty_info(absch_json: &str) -> Result<HashSet<NagoyaCountryInfo>
     Ok(v)
 }
 
-pub fn get_implementing_countries() -> Result<ImplementingCountries, Box<dyn Error>> {
+pub async fn get_implementing_countries() -> Result<ImplementingCountries, Box<dyn Error>> {
     // TODO: Use Caching
     // TODO: Instead of strings, use the data model provided by the iso3166 crate (or return a fitting error)
 
     // Get JSON from ABSCH (if not in cache; cache duration in config)
-    let nagoya_country_info = get_nagoya_treaty_info(&fetch_absch_treaty_info())?;
+    let nagoya_country_info = get_nagoya_treaty_info(&fetch_absch_treaty_info().await)?;
 
     // Get List of implementing countries from the struct. Assumed that those are the countries which
     // are party to the contract
