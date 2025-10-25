@@ -22,7 +22,7 @@ async fn main() {
     dotenv().ok();
 
     // Load List of Countries implementing measures according to the Nagoya Protocol
-    let implementing_countries = helpers::get_implementing_countries().unwrap();
+    let implementing_countries = helpers::get_implementing_countries().await.unwrap();
 
     let server_address = dotenvy::var("SERVER_HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
     let service_port = dotenvy::var("SERVER_PORT")
