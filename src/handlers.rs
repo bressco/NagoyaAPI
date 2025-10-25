@@ -29,7 +29,6 @@ pub async fn nagoya_check_wrapper(
 pub async fn health_check() -> Json<GenericResponse> {
     Json(GenericResponse {
         message: String::from("NagoyaAPI is running"),
-        status_code: 200,
     })
 }
 
