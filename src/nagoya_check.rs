@@ -40,7 +40,6 @@ pub async fn nagoya_check(
 
     Json(NagoyaResponse {
         check_result: probe_bool,
-        status_code: 200,
     })
 }
 

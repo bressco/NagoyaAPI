@@ -32,6 +32,8 @@ pub struct ImplementingCountries {
 #[derive(Deserialize, IntoParams)]
 pub struct NagoyaCheckData {
     // TODO: Use additional validation
+    // TODO: Add data for registered collection
+    // TODO: Add data for Certificates
     pub(crate) probe_country: String,
 }
 
@@ -39,12 +41,10 @@ pub struct NagoyaCheckData {
 #[response(status = 200)]
 pub struct NagoyaResponse {
     pub(crate) check_result: bool,
-    pub(crate) status_code: u16,
 }
 
 #[derive(Serialize, IntoResponses, ToSchema)]
 #[response(status = 200)]
 pub struct GenericResponse {
     pub(crate) message: String,
-    pub(crate) status_code: u16,
 }
