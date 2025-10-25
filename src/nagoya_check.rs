@@ -1,6 +1,5 @@
 use crate::models::{ImplementingCountries, NagoyaCheckData, NagoyaResponse};
 use axum::Json;
-use std::collections::HashSet;
 use std::error::Error;
 
 /// Checks whether the probe is from a country implementing Nagoya Measures. If so, the Result
@@ -71,6 +70,7 @@ async fn test_are_affils_from_probe_country() {
 
 #[tokio::test]
 async fn test_probe_in_implementing_country() {
+    use std::collections::HashSet;
     let data_included = ImplementingCountries {
         countries: HashSet::from_iter(vec![String::from("DEU"), String::from("AUS")]),
     };
