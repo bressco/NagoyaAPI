@@ -68,6 +68,7 @@ async fn test_are_affils_from_probe_country() {
 }
 
 #[tokio::test]
+#[allow(clippy::needless_borrow)]
 async fn test_probe_in_implementing_country() {
     use std::collections::HashSet;
     let data_included = ImplementingCountries {

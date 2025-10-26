@@ -62,6 +62,7 @@ pub async fn get_implementing_countries() -> Result<ImplementingCountries, Box<d
 }
 
 #[cfg(test)]
+#[allow(clippy::needless_borrow)]
 mod tests {
     use super::*;
     use crate::models::{Treaties, Treaty};
