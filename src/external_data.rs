@@ -41,12 +41,12 @@ pub async fn fetch_country_code_by_coordinates(
     coordinates: Coordinates,
 ) -> String {
     let request = format!(
-        "{}{}?lat={}&lon={}&json",
+        "{host}{endpoint}?lat={lat}&lon={lon}&json",
         //env_map.get("NOMINATIM_HOST").unwrap(),
-        config.nominatim_host,
-        "/reverse",
-        coordinates.latitude,
-        coordinates.longitude
+        host = config.nominatim_host,
+        endpoint = "/reverse",
+        lat = coordinates.latitude,
+        lon = coordinates.longitude
     );
 
     let nominatim_json: NominatimResponse =

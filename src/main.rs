@@ -53,10 +53,13 @@ async fn main() {
         config: config.clone(),
     };
 
-    let listener =
-        tokio::net::TcpListener::bind(format!("{}:{}", config.server_host, config.server_port))
-            .await
-            .unwrap();
+    let listener = tokio::net::TcpListener::bind(format!(
+        "{host}:{port}",
+        host = config.server_host,
+        port = config.server_port
+    ))
+    .await
+    .unwrap();
 
     let app = Router::new()
         .route("/nagoya_check_cc", post(api::nagoya_check_country_code))
