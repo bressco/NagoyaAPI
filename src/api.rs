@@ -1,6 +1,6 @@
 use crate::ApiDoc;
 use crate::models::{
-    Config, GenericResponse, ImplementingCountries, NagoyaCheckData, NagoyaCheckDataGeo,
+    Config, GenericResponse, ImplementingCountries, NagoyaCheckDataCC, NagoyaCheckDataGeo,
     NagoyaResponse,
 };
 use crate::nagoya_check::{nagoya_check_cc, nagoya_check_geo};
@@ -12,20 +12,22 @@ use utoipa::OpenApi;
 #[utoipa::path(
     post,
     path = "/nagoya_check_cc",
+    request_body = NagoyaCheckDataCC,
     responses(
     (status = 200, description = "Result of the compliance check", body = NagoyaResponse)
     )
 )]
 pub async fn nagoya_check_country_code(
     State(implementing_countries): State<ImplementingCountries>,
-    Json(payload): Json<NagoyaCheckData>,
+    Json(payload): Json<NagoyaCheckDataCC>,
 ) -> Json<NagoyaResponse> {
-    nagoya_check_cc(payload.probe_country, implementing_countries).await
+    nagoya_check_cc(payload.probe_country, &implementing_countries).await
 }
 
 #[utoipa::path(
     post,
     path = "/nagoya_check_geo",
+    request_body = NagoyaCheckDataGeo,
     responses((status=200, description ="Result of the compliance check", body = NagoyaResponse))
 )]
 pub async fn nagoya_check_geocoordinates(
@@ -33,7 +35,7 @@ pub async fn nagoya_check_geocoordinates(
     State(config): State<Config>,
     Json(payload): Json<NagoyaCheckDataGeo>,
 ) -> Json<NagoyaResponse> {
-    nagoya_check_geo(payload.coordinates, implementing_countries, config).await
+    nagoya_check_geo(payload.coordinates, &implementing_countries, &config).await
 }
 
 #[utoipa::path(

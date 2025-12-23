@@ -36,7 +36,10 @@ async fn fetch_absch_treaty_info() -> String {
     // At least, if the fetching fails repeatedly, maybe configurable in .env
 }
 
-pub async fn fetch_country_code_by_coordinates(config: Config, coordinates: Coordinates) -> String {
+pub async fn fetch_country_code_by_coordinates(
+    config: &Config,
+    coordinates: Coordinates,
+) -> String {
     let request = format!(
         "{}{}?lat={}&lon={}&json",
         //env_map.get("NOMINATIM_HOST").unwrap(),

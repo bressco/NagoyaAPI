@@ -30,8 +30,8 @@ pub struct ImplementingCountries {
     pub(crate) countries: HashSet<String>,
 }
 
-#[derive(Deserialize, IntoParams)]
-pub struct NagoyaCheckData {
+#[derive(Deserialize, IntoParams, ToSchema)]
+pub struct NagoyaCheckDataCC {
     // TODO: Use additional validation
     // TODO: Add data for registered collection
     // TODO: Add data for Certificates
@@ -39,7 +39,7 @@ pub struct NagoyaCheckData {
 }
 
 // TODO: Find out whether there is a proper way to do this / access the data directly
-#[derive(Deserialize)]
+#[derive(Deserialize, ToSchema)]
 pub struct NagoyaCheckDataGeo {
     pub(crate) coordinates: Coordinates,
 }
@@ -63,7 +63,7 @@ pub struct GenericResponse {
 //    data: T,
 //}
 
-#[derive(Deserialize)]
+#[derive(Deserialize, ToSchema)]
 pub struct Coordinates {
     pub(crate) latitude: f64,
     pub(crate) longitude: f64,
