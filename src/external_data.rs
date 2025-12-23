@@ -1,4 +1,6 @@
-use crate::models::{ImplementingCountries, NagoyaCountryInfo};
+use crate::models::{
+    Config, Coordinates, ImplementingCountries, NagoyaCountryInfo, NominatimResponse,
+};
 use std::collections::HashSet;
 use std::error::Error;
 
@@ -32,6 +34,21 @@ async fn fetch_absch_treaty_info() -> String {
     // If a cache is used, that could be used instead, also to steer the retry time by resetting
     // the stale "timer". But for now this should be enough
     // At least, if the fetching fails repeatedly, maybe configurable in .env
+}
+
+pub async fn fetch_country_code_by_coordinates(config: Config, coordinates: Coordinates) -> String {
+    let request = format!(
+        "{}{}?lat={}&lon={}&json",
+        //env_map.get("NOMINATIM_HOST").unwrap(),
+        config.nominatim_host,
+        "/reverse",
+        coordinates.latitude,
+        coordinates.longitude
+    );
+
+    let nominatim_json: NominatimResponse =
+        reqwest::get(request).await.unwrap().json().await.unwrap();
+    nominatim_json.address.country_code
 }
 
 fn get_nagoya_treaty_info(absch_json: &str) -> Result<HashSet<NagoyaCountryInfo>, Box<dyn Error>> {
