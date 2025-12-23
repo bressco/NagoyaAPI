@@ -1,4 +1,5 @@
-use crate::models::{ImplementingCountries, NagoyaCheckData, NagoyaResponse};
+use crate::external_data::fetch_country_code_by_coordinates;
+use crate::models::{Config, Coordinates, ImplementingCountries, NagoyaResponse};
 use axum::Json;
 use std::error::Error;
 
@@ -10,18 +11,27 @@ async fn is_probe_in_implementing_country(
     Ok(implementing_countries.countries.contains(probe_country))
 }
 
-pub async fn nagoya_check(
-    Json(payload): Json<NagoyaCheckData>,
+pub async fn nagoya_check_cc(
+    probe_country: String,
     implementing_countries: ImplementingCountries,
 ) -> Json<NagoyaResponse> {
     Json(NagoyaResponse {
-        check_result: is_probe_in_implementing_country(
-            &implementing_countries,
-            &payload.probe_country,
-        )
-        .await
-        .unwrap(),
+        check_result: is_probe_in_implementing_country(&implementing_countries, &probe_country)
+            .await
+            .unwrap(),
     })
+}
+
+pub async fn nagoya_check_geo(
+    coordinates: Coordinates,
+    implementing_countries: ImplementingCountries,
+    config: Config, // Host meaningless here, so unpacked just before use
+) -> Json<NagoyaResponse> {
+    nagoya_check_cc(
+        fetch_country_code_by_coordinates(config, coordinates).await,
+        implementing_countries,
+    )
+    .await
 }
 
 #[tokio::test]

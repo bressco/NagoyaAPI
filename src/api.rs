@@ -1,10 +1,9 @@
 use crate::ApiDoc;
-use crate::external_data::fetch_country_code_by_coordinates;
 use crate::models::{
     Config, GenericResponse, ImplementingCountries, NagoyaCheckData, NagoyaCheckDataGeo,
     NagoyaResponse,
 };
-use crate::nagoya_check;
+use crate::nagoya_check::{nagoya_check_cc, nagoya_check_geo};
 use axum::Json;
 use axum::extract::State;
 use utoipa::OpenApi;
@@ -21,7 +20,7 @@ pub async fn nagoya_check_country_code(
     State(implementing_countries): State<ImplementingCountries>,
     Json(payload): Json<NagoyaCheckData>,
 ) -> Json<NagoyaResponse> {
-    nagoya_check::nagoya_check(Json(payload), implementing_countries).await
+    nagoya_check_cc(payload.probe_country, implementing_countries).await
 }
 
 #[utoipa::path(
@@ -32,16 +31,9 @@ pub async fn nagoya_check_country_code(
 pub async fn nagoya_check_geocoordinates(
     State(implementing_countries): State<ImplementingCountries>,
     State(config): State<Config>,
-    //State(AppState): State<AppState>,
     Json(payload): Json<NagoyaCheckDataGeo>,
 ) -> Json<NagoyaResponse> {
-    nagoya_check_country_code(
-        State(implementing_countries),
-        Json(NagoyaCheckData {
-            probe_country: fetch_country_code_by_coordinates(config, payload.coordinates).await,
-        }),
-    )
-    .await
+    nagoya_check_geo(payload.coordinates, implementing_countries, config).await
 }
 
 #[utoipa::path(
