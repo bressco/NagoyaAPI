@@ -2,7 +2,7 @@ use crate::models::{ImplementingCountries, NagoyaCheckData, NagoyaResponse};
 use axum::Json;
 use std::error::Error;
 
-pub async fn is_probe_in_implementing_country(
+async fn is_probe_in_implementing_country(
     implementing_countries: &ImplementingCountries,
     probe_country: &str,
 ) -> Result<bool, Box<dyn Error>> {
