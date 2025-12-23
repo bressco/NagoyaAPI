@@ -1,7 +1,6 @@
 use crate::models::{AppState, Config, ImplementingCountries};
 use axum::Router;
 use axum::routing::{get, post};
-use dotenvy::dotenv;
 use std::collections::HashMap;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -23,7 +22,7 @@ pub struct ApiDoc;
 #[tokio::main]
 async fn main() {
     // Load env
-    dotenv().ok();
+    dotenvy::dotenv().expect("Failed to read .env file");
     let env_map: HashMap<String, String> = dotenvy::vars().collect();
 
     // Load List of Countries implementing measures according to the Nagoya Protocol
