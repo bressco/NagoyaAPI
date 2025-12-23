@@ -26,12 +26,14 @@ async fn main() {
     let env_map: HashMap<String, String> = dotenvy::vars().collect();
 
     // Load List of Countries implementing measures according to the Nagoya Protocol
+    // Without the data the service cannot work, thus the panic is justified if the data
+    // cannot be fetched
     // TODO: Use timestamped struct for caching
     let implementing_countries: ImplementingCountries =
         external_data::get_implementing_countries().await.unwrap();
 
     //let server_address = dotenvy::var("SERVER_HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
-    let server_address: &str = env_map
+    let server_address = env_map
         .get("SERVER_HOST")
         .map(|s| s.as_str())
         .unwrap_or("127.0.0.1");
@@ -43,7 +45,10 @@ async fn main() {
         .expect("Please select a valid port number of between 0 and 65535");
 
     let config = Config {
-        nominatim_host: env_map.get("NOMINATIM_HOST").unwrap().to_string(),
+        nominatim_host: env_map
+            .get("NOMINATIM_HOST")
+            .expect("Please provide a Nominatim Host")
+            .to_string(),
         server_host: server_address.to_string(),
         server_port,
     };
