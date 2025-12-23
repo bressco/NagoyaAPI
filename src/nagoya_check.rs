@@ -29,17 +29,13 @@ pub async fn nagoya_check(
     Json(payload): Json<NagoyaCheckData>,
     implementing_countries: ImplementingCountries,
 ) -> Json<NagoyaResponse> {
-    let probe_bool: bool =
-        is_probe_in_implementing_country(&implementing_countries, &payload.probe_country)
-            .await
-            .unwrap();
-    //let affils_bool: bool =
-    //    are_affils_from_probe_country(&payload.researcher_affils, &payload.probe_country)
-    //        .await
-    //        .unwrap();
-
     Json(NagoyaResponse {
-        check_result: probe_bool,
+        check_result: is_probe_in_implementing_country(
+            &implementing_countries,
+            &payload.probe_country,
+        )
+        .await
+        .unwrap(),
     })
 }
 
