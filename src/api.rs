@@ -44,10 +44,6 @@ pub async fn nagoya_check_geocoordinates(
     .await
 }
 
-// TODO: Resolve Geocoordinates
-// TODO: Pass data to nagoya by cc
-// TODO: Add endpoint for geocoordinates
-
 #[utoipa::path(
     get,
     path = "/health",
