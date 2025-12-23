@@ -32,18 +32,21 @@ async fn main() {
         external_data::get_implementing_countries().await.unwrap();
 
     //let server_address = dotenvy::var("SERVER_HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
-    let server_address = env_map.get("SERVER_HOST").unwrap();
-    let service_port = env_map
-        .get("SERVER_PORT") //dotenvy::var("SERVER_PORT")
-        //.unwrap_or_else(|_| "3000".to_string())
-        .unwrap()
+    let server_address: &str = env_map
+        .get("SERVER_HOST")
+        .map(|s| s.as_str())
+        .unwrap_or("127.0.0.1");
+    let server_port = env_map
+        .get("SERVER_PORT")
+        .map(|s| s.as_str())
+        .unwrap_or("3125")
         .parse::<u16>()
         .expect("Please select a valid port number of between 0 and 65535");
 
     let config = Config {
         nominatim_host: env_map.get("NOMINATIM_HOST").unwrap().to_string(),
         server_host: server_address.to_string(),
-        server_port: service_port,
+        server_port,
     };
 
     let state = AppState {
