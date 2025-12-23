@@ -1,3 +1,4 @@
+use axum::extract::FromRef;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use utoipa::{IntoParams, IntoResponses, ToSchema};
@@ -37,6 +38,12 @@ pub struct NagoyaCheckData {
     pub(crate) probe_country: String,
 }
 
+// TODO: Find out whether there is a proper way to do this / access the data directly
+#[derive(Deserialize)]
+pub struct NagoyaCheckDataGeo {
+    pub(crate) coordinates: Coordinates,
+}
+
 #[derive(Serialize, IntoResponses, ToSchema)]
 #[response(status = 200)]
 pub struct NagoyaResponse {
@@ -47,4 +54,50 @@ pub struct NagoyaResponse {
 #[response(status = 200)]
 pub struct GenericResponse {
     pub(crate) message: String,
+}
+
+//pub struct Cache<T> {
+//    // Can run longer
+//    // TODO: Use monotonic clock
+//    timestamp: u64,
+//    data: T,
+//}
+
+#[derive(Deserialize)]
+pub struct Coordinates {
+    pub(crate) latitude: f64,
+    pub(crate) longitude: f64,
+}
+
+#[derive(Deserialize)]
+pub struct NominatimAddress {
+    pub(crate) country_code: String,
+}
+#[derive(Deserialize)]
+pub struct NominatimResponse {
+    pub(crate) address: NominatimAddress,
+}
+
+#[derive(Clone)]
+pub struct Config {
+    pub nominatim_host: String,
+    pub server_host: String,
+    pub server_port: u16,
+}
+
+#[derive(Clone)]
+pub struct AppState {
+    pub implementing_countries: ImplementingCountries,
+    pub config: Config,
+}
+
+impl FromRef<AppState> for Config {
+    fn from_ref(app_state: &AppState) -> Config {
+        app_state.config.clone()
+    }
+}
+impl FromRef<AppState> for ImplementingCountries {
+    fn from_ref(app_state: &AppState) -> ImplementingCountries {
+        app_state.implementing_countries.clone()
+    }
 }
