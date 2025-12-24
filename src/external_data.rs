@@ -1,6 +1,7 @@
 use crate::models::{
     Config, Coordinates, ImplementingCountries, NagoyaCountryInfo, NominatimResponse,
 };
+use reqwest::Client;
 use std::collections::HashSet;
 use std::error::Error;
 
@@ -41,7 +42,7 @@ pub async fn fetch_country_code_by_coordinates(
     coordinates: Coordinates,
 ) -> String {
     let request = format!(
-        "{host}{endpoint}?lat={lat}&lon={lon}&json",
+        "{host}{endpoint}?lat={lat}&lon={lon}&format=json",
         //env_map.get("NOMINATIM_HOST").unwrap(),
         host = config.nominatim_host,
         endpoint = "/reverse",
@@ -49,8 +50,22 @@ pub async fn fetch_country_code_by_coordinates(
         lon = coordinates.longitude
     );
 
-    let nominatim_json: NominatimResponse =
-        reqwest::get(request).await.unwrap().json().await.unwrap();
+    // TODO: Move client to state to avoid rebuilding
+    // TODO: Define User Agent in client
+    //let client = Client::new();
+    let client = Client::builder()
+        .user_agent("NagoyaAPI/0.1.0") // API requires UA for interaction
+        .build()
+        .unwrap();
+    let nominatim_res = client
+        .get(request)
+        .send()
+        .await
+        .unwrap()
+        .text()
+        .await
+        .unwrap();
+    let nominatim_json: NominatimResponse = serde_json::from_str(&nominatim_res).unwrap();
     nominatim_json.address.country_code
 }
 
