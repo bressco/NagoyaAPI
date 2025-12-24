@@ -14,28 +14,41 @@ use utoipa::OpenApi;
     path = "/nagoya_check_cc",
     request_body = NagoyaCheckDataCC,
     responses(
-    (status = 200, description = "Result of the compliance check", body = NagoyaResponse)
+    (status = 200, description = "Result of the compliance check", body = NagoyaResponse),
+    (status = 500, description = "Internal Server Error")
     )
 )]
 pub async fn nagoya_check_country_code(
     State(implementing_countries): State<ImplementingCountries>,
     Json(payload): Json<NagoyaCheckDataCC>,
-) -> Json<NagoyaResponse> {
-    nagoya_check_cc(payload.probe_country, &implementing_countries).await
+) -> Result<Json<NagoyaResponse>, axum::http::StatusCode> {
+    match nagoya_check_cc(payload.probe_country, &implementing_countries).await {
+        Ok(res) => Ok(res),
+        Err(_) => Err(axum::http::StatusCode::INTERNAL_SERVER_ERROR),
+    }
 }
 
 #[utoipa::path(
     post,
     path = "/nagoya_check_geo",
     request_body = NagoyaCheckDataGeo,
-    responses((status=200, description ="Result of the compliance check", body = NagoyaResponse))
+    responses(
+    (status=200, description ="Result of the compliance check", body = NagoyaResponse),
+    (status = 500, description = "Internal Server Error")
+    )
 )]
 pub async fn nagoya_check_geocoordinates(
     State(implementing_countries): State<ImplementingCountries>,
     State(config): State<Config>,
     Json(payload): Json<NagoyaCheckDataGeo>,
-) -> Json<NagoyaResponse> {
-    nagoya_check_geo(payload.coordinates, &implementing_countries, &config).await
+) -> Result<Json<NagoyaResponse>, axum::http::StatusCode> {
+    // TODO: Explicit error handling via match here?
+    // TODO: More granular error response, e.g. bc upstream failed
+    //Ok(nagoya_check_geo(payload.coordinates, &implementing_countries, &config).await?)
+    match nagoya_check_geo(payload.coordinates, &implementing_countries, &config).await {
+        Ok(res) => Ok(res),
+        Err(_) => Err(axum::http::StatusCode::INTERNAL_SERVER_ERROR),
+    }
 }
 
 #[utoipa::path(

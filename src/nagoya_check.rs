@@ -14,20 +14,20 @@ async fn is_probe_in_implementing_country(
 pub async fn nagoya_check_cc(
     probe_country: String,
     implementing_countries: &ImplementingCountries,
-) -> Json<NagoyaResponse> {
-    Json(NagoyaResponse {
+) -> Result<Json<NagoyaResponse>, Box<dyn Error>> {
+    Ok(Json(NagoyaResponse {
         check_result: is_probe_in_implementing_country(implementing_countries, &probe_country)
-            .await
-            .unwrap(),
-    })
+            .await?,
+    }))
 }
 
 pub async fn nagoya_check_geo(
     coordinates: Coordinates,
     implementing_countries: &ImplementingCountries,
     config: &Config, // Host meaningless here, so unpacked just before use
-) -> Json<NagoyaResponse> {
+) -> Result<Json<NagoyaResponse>, Box<dyn Error>> {
     nagoya_check_cc(
+        // TODO: Add error handling for failing fetch
         fetch_country_code_by_coordinates(config, coordinates).await,
         implementing_countries,
     )
