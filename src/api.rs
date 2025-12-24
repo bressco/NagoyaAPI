@@ -1,6 +1,6 @@
 use crate::ApiDoc;
 use crate::models::{
-    Config, GenericResponse, ImplementingCountries, NagoyaCheckDataCC, NagoyaCheckDataGeo,
+    AppState, GenericResponse, ImplementingCountries, NagoyaCheckDataCC, NagoyaCheckDataGeo,
     NagoyaResponse,
 };
 use crate::nagoya_check::{nagoya_check_cc, nagoya_check_geo};
@@ -40,14 +40,21 @@ pub async fn nagoya_check_country_code(
     )
 )]
 pub async fn nagoya_check_geocoordinates(
-    State(implementing_countries): State<ImplementingCountries>,
-    State(config): State<Config>,
+    //State(implementing_countries): State<ImplementingCountries>,
+    //State(config): State<Config>,
+    State(state): State<AppState>,
     Json(payload): Json<NagoyaCheckDataGeo>,
 ) -> Result<Json<NagoyaResponse>, axum::http::StatusCode> {
     // TODO: Explicit error handling via match here?
     // TODO: More granular error response, e.g. bc upstream failed
     //Ok(nagoya_check_geo(payload.coordinates, &implementing_countries, &config).await?)
-    match nagoya_check_geo(payload.coordinates, &implementing_countries, &config).await {
+    match nagoya_check_geo(
+        payload.coordinates,
+        &state.implementing_countries,
+        &state.config,
+    )
+    .await
+    {
         Ok(res) => Ok(res),
         Err(_) => Err(axum::http::StatusCode::INTERNAL_SERVER_ERROR),
     }

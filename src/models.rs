@@ -78,14 +78,14 @@ pub struct NominatimResponse {
     pub(crate) address: NominatimAddress,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Deserialize)]
 pub struct Config {
     pub nominatim_host: String,
     pub server_host: String,
     pub server_port: u16,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Deserialize)]
 pub struct AppState {
     pub implementing_countries: ImplementingCountries,
     pub config: Config,

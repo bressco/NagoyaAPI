@@ -6,7 +6,7 @@ use std::error::Error;
 async fn is_probe_in_implementing_country(
     implementing_countries: &ImplementingCountries,
     probe_country: &str,
-) -> Result<bool, Box<dyn Error>> {
+) -> Result<bool, Box<dyn Error + Send + Sync>> {
     // Check whether probe country is in list of implementing countries
     let probe_country_code3: &str;
     if probe_country.len() == 3 {
@@ -29,7 +29,7 @@ async fn is_probe_in_implementing_country(
 pub async fn nagoya_check_cc(
     probe_country: String,
     implementing_countries: &ImplementingCountries,
-) -> Result<Json<NagoyaResponse>, Box<dyn Error>> {
+) -> Result<Json<NagoyaResponse>, Box<dyn Error + Send + Sync>> {
     Ok(Json(NagoyaResponse {
         check_result: is_probe_in_implementing_country(implementing_countries, &probe_country)
             .await?,
@@ -40,10 +40,10 @@ pub async fn nagoya_check_geo(
     coordinates: Coordinates,
     implementing_countries: &ImplementingCountries,
     config: &Config, // Host meaningless here, so unpacked just before use
-) -> Result<Json<NagoyaResponse>, Box<dyn Error>> {
+) -> Result<Json<NagoyaResponse>, Box<dyn Error + Send + Sync>> {
     nagoya_check_cc(
         // TODO: Add error handling for failing fetch
-        fetch_country_code_by_coordinates(config, coordinates).await,
+        fetch_country_code_by_coordinates(config, coordinates).await?,
         implementing_countries,
     )
     .await
