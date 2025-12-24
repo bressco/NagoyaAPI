@@ -8,7 +8,9 @@ async fn is_probe_in_implementing_country(
     probe_country: &str,
 ) -> Result<bool, Box<dyn Error>> {
     // Check whether probe country is in list of implementing countries
-    Ok(implementing_countries.countries.contains(probe_country))
+    Ok(implementing_countries
+        .countries
+        .contains(&probe_country.to_uppercase()))
 }
 
 pub async fn nagoya_check_cc(

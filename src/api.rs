@@ -22,6 +22,8 @@ pub async fn nagoya_check_country_code(
     State(implementing_countries): State<ImplementingCountries>,
     Json(payload): Json<NagoyaCheckDataCC>,
 ) -> Result<Json<NagoyaResponse>, axum::http::StatusCode> {
+    // TODO: Check for valid country code before passing on the data
+    // TODO: Ensure that comparison happens with the same case
     match nagoya_check_cc(payload.probe_country, &implementing_countries).await {
         Ok(res) => Ok(res),
         Err(_) => Err(axum::http::StatusCode::INTERNAL_SERVER_ERROR),
