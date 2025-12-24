@@ -51,10 +51,10 @@ pub async fn fetch_country_code_by_coordinates(
     );
 
     // TODO: Move client to state to avoid rebuilding
-    // TODO: Define User Agent in client
     //let client = Client::new();
+    static APP_USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"),);
     let client = Client::builder()
-        .user_agent("NagoyaAPI/0.1.0") // API requires UA for interaction
+        .user_agent(APP_USER_AGENT) // API requires UA for interaction
         .build()
         .unwrap();
     let nominatim_res = client
@@ -66,7 +66,7 @@ pub async fn fetch_country_code_by_coordinates(
         .await
         .unwrap();
     let nominatim_json: NominatimResponse = serde_json::from_str(&nominatim_res).unwrap();
-    nominatim_json.address.country_code
+    nominatim_json.address.country_code // returns a code 2
 }
 
 fn get_nagoya_treaty_info(absch_json: &str) -> Result<HashSet<NagoyaCountryInfo>, Box<dyn Error>> {
