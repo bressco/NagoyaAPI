@@ -1,6 +1,7 @@
 use crate::models::{AppState, Config, ImplementingCountries};
 use axum::Router;
 use axum::routing::{get, post};
+use tower_http::trace::TraceLayer;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -63,7 +64,12 @@ async fn main() {
         .route("/openapi.json", get(api::openapi))
         .route("/health", get(api::health_check))
         .merge(SwaggerUi::new("/swagger-ui").url("/docs", ApiDoc::openapi()))
-        .with_state(state);
+        .with_state(state)
+        .layer(TraceLayer::new_for_http());
+
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::DEBUG)
+        .init();
 
     axum::serve(listener, app).await.unwrap();
 }
