@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Constantin Breß <constantin.bress@partner.kit.edu>
+
+SPDX-License-Identifier: LGPL-3.0-or-later
+-->
+
 NagoyaAPI
 ===
 

@@ -54,8 +54,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: webiny/action-conventional-commits@v1.3.0
-  # SPDX-FileCopyrightText: 2020 Free Software Foundation Europe e.V.
-  # SPDX-License-Identifier: CC0-1.0
   reuse-test:
     name: Reuse Compliance Test
     runs-on: ubuntu-latest

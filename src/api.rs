@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Constantin Breß <constantin.bress@partner.kit.edu>
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
 use crate::ApiDoc;
 use crate::models::{
     AppState, GenericResponse, ImplementingCountries, NagoyaCheckDataCC, NagoyaCheckDataGeo,
