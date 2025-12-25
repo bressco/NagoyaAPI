@@ -35,7 +35,7 @@ async fn main() {
     let implementing_countries: ImplementingCountries =
         external_data::get_implementing_countries().await.unwrap();
 
-    let server_address = dotenvy::var("SERVER_HOST").unwrap_or("127.0.0.1".to_string());
+    let server_address = dotenvy::var("SERVER_HOST").unwrap_or("0.0.0.0".to_string());
     let server_port = dotenvy::var("SERVER_PORT")
         .unwrap_or("3125".to_string())
         .parse::<u16>()
@@ -43,6 +43,7 @@ async fn main() {
 
     let config = Config {
         nominatim_host: dotenvy::var("NOMINATIM_HOST")
+            // A custom host should be provided to not hog the service provided by OSM
             .expect("Please provide a Nominatim Host")
             .to_string(),
         server_host: server_address.to_string(),
