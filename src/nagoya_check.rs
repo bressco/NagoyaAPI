@@ -14,7 +14,9 @@ async fn is_probe_in_implementing_country(
     // Check whether probe country is in list of implementing countries
     let probe_country_code3: &str;
     if probe_country.len() == 3 {
-        probe_country_code3 = probe_country;
+        probe_country_code3 = rust_iso3166::from_alpha3(&probe_country.to_uppercase())
+            .unwrap()
+            .alpha3;
     } else if probe_country.len() == 2 {
         //TODO: Add error handling (e.g. if correct length, but country code incorrect
         probe_country_code3 = rust_iso3166::from_alpha2(&probe_country.to_uppercase())
