@@ -7,31 +7,6 @@ use crate::models::{Config, Coordinates, ImplementingCountries, NagoyaResponse};
 use axum::Json;
 use std::error::Error;
 
-async fn is_probe_in_implementing_country(
-    implementing_countries: &ImplementingCountries,
-    probe_country: &str,
-) -> Result<bool, Box<dyn Error + Send + Sync>> {
-    // Check whether probe country is in list of implementing countries
-    let probe_country_code3: &str;
-    if probe_country.len() == 3 {
-        probe_country_code3 = rust_iso3166::from_alpha3(&probe_country.to_uppercase())
-            .unwrap()
-            .alpha3;
-    } else if probe_country.len() == 2 {
-        //TODO: Add error handling (e.g. if correct length, but country code incorrect
-        probe_country_code3 = rust_iso3166::from_alpha2(&probe_country.to_uppercase())
-            .unwrap()
-            .alpha3;
-    } else {
-        // TODO: Fix error handling
-        panic!("Invalid country code")
-    }
-    Ok(implementing_countries
-        .countries
-        //.contains(&probe_country.to_uppercase()))
-        .contains(&probe_country_code3.to_uppercase()))
-}
-
 pub async fn nagoya_check_cc(
     probe_country: String,
     implementing_countries: &ImplementingCountries,
@@ -53,6 +28,30 @@ pub async fn nagoya_check_geo(
         implementing_countries,
     )
     .await
+}
+
+async fn is_probe_in_implementing_country(
+    implementing_countries: &ImplementingCountries,
+    probe_country: &str,
+) -> Result<bool, Box<dyn Error + Send + Sync>> {
+    // Check whether probe country is in list of implementing countries
+    let probe_country_code3: &str;
+    if probe_country.len() == 3 {
+        probe_country_code3 = rust_iso3166::from_alpha3(&probe_country.to_uppercase())
+            .unwrap()
+            .alpha3;
+    } else if probe_country.len() == 2 {
+        //TODO: Add error handling (e.g. if correct length, but country code incorrect
+        probe_country_code3 = rust_iso3166::from_alpha2(&probe_country.to_uppercase())
+            .unwrap()
+            .alpha3;
+    } else {
+        // TODO: Fix error handling
+        panic!("Invalid country code")
+    }
+    Ok(implementing_countries
+        .countries
+        .contains(&probe_country_code3.to_uppercase()))
 }
 
 #[tokio::test]
