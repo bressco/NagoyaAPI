@@ -11,14 +11,42 @@ Simple API providing a lookup on whether measures implementing
 the [Nagoya Protocol](https://en.wikipedia.org/wiki/Nagoya_Protocol) are to be respected regarding
 a dataset.
 
-The API aims to be integrated into pipelines or portals lie a search portal to provide information to researchers. If
-the country affiliation of the researcher is unclear, the pipeline or portal should provide a default one.
+The API aims to be integrated into pipelines or portals like a search portal to provide information to researchers.
 
 Applicability of the Measures
 ---
 
-Whether measures implementing of the Nagoya Protocol need to be respected follows the Checklist of
-the [University of Cambridge](https://www.research-operations.admin.cam.ac.uk/nagoya-checklist-part-1)
+If a country implements ABS measures based on the Nagoya Protocol, they need to be followed. This
+[Checklist](https://www.research-operations.admin.cam.ac.uk/nagoya-checklist-part-1) can be helpful to work out the
+details.
+
+Configuration
+---
+
+The Service can be configured using a .env file.
+
+| Option         | Type        | Default | Required? | Description                                            |
+|----------------|-------------|---------|-----------|--------------------------------------------------------| 
+| SERVER_HOST    | IP Address  | 0.0.0.0 | Yes       | IP address to bind the server to                       |
+| SERVER_PORT    | Port Number | 3125    | Yes       | Port to bind the server to                             |
+| NOMINATIM_HOST | URL         | None    | Yes       | (External) Nominatim Host to use for reverse geocoding |
+
+Usage
+---
+
+The service exposes several endpoints to check whether a country has ABS measures which (potentially) need to be
+respected according to the Nagoya Protocol. The Endpoints either take a ISO 3166 Country Code or geographic coordinates.
+
+Endpoints
+----
+
+| Method | Path                | Description                                                                           |
+|--------|---------------------|---------------------------------------------------------------------------------------|
+| POST   | `/nagoya_check_cc`  | Perform a Nagoya compliance check using a country code.                               |
+| POST   | `/nagoya_check_geo` | Perform a Nagoya compliance check using geographic coordinates (latitude, longitude). |
+| GET    | `/health`           | Simple health‑check endpoint returning service status.                                |
+| GET    | `/openapi.json`     | Retrieve the OpenAPI specification in JSON format.                                    |
+| GET    | `/swagger-ui`       | Interactive Swagger UI for exploring the API.                                         |
 
 Other Solutions
 ---

@@ -26,7 +26,7 @@ pub struct ApiDoc;
 #[tokio::main]
 async fn main() {
     // Load env
-    dotenvy::dotenv().expect("Failed to read .env file");
+    dotenvy::dotenv().expect("No .env file found, using defaults");
 
     // Load List of Countries implementing measures according to the Nagoya Protocol
     // Without the data the service cannot work, thus the panic is justified if the data
