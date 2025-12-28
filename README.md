@@ -54,4 +54,16 @@ Other Solutions
 [Nagoya Lookup Service](https://github.com/hseifert/nagoya-lookup-service): Provides Lookup based on coordinates and is
 currently (2025-10-04) unmaintained. As information regarding Nagoya Measures the service just uses the information
 whether a country has ratified the Protocol, but not, whether it actually implements measures. Those can (now) be
-accessed via the (upcoming) API of the [ABS Clearing House](absch.cbd.int). This is used for the NagoyaAPI Project.
+accessed via the (upcoming) API of the [ABS Clearing House](https://absch.cbd.int). This is used for the NagoyaAPI
+Project.
+
+Additional Resources
+---
+
+* Information on the Nagoya Protocol and ongoing discussions: [Website of the CBD](https://www.cbd.int/abs)
+* [Information regarding the Convention on Biological Diversity](https://www.cbd.int)
+* [Ongoing Discussion on the inclusion of Digital Sequence Information](https://www.cbd.int/dsi-gr) into an Access and
+  Benefit Sharing
+  Mechanism
+* [EU Regulation on the Nagoya Protocol](https://eur-lex.europa.eu/eli/reg/2014/511/oj/eng), mainly concerning
+  documentation and due diligence
