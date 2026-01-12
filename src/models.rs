@@ -2,9 +2,12 @@
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
+use crate::external_data;
 use axum::extract::FromRef;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
+use std::time::Duration;
+use tokio::time::Instant;
 use utoipa::{IntoParams, IntoResponses, ToSchema};
 
 // API
@@ -97,14 +100,59 @@ impl FromRef<AppState> for Config {
         app_state.config.clone()
     }
 }
-#[derive(Clone, Deserialize)]
+#[derive(Clone)]
 pub struct AppState {
-    pub implementing_countries: ImplementingCountries,
+    //pub implementing_countries: ImplementingCountries, //replace with Cache<ImplementingCountries>
     pub config: Config,
+    implementing_countries: Cache<ImplementingCountries>,
 }
-//pub struct Cache<T> {
-//    // Can run longer
-//    // TODO: Use monotonic clock
-//    timestamp: u64,
-//    data: T,
+
+impl AppState {
+    // Returns the current version of implementing countries; fetching a new one, if needed
+    async fn implementing_countries(&mut self) -> &ImplementingCountries {
+        self.implementing_countries.get().await
+    }
+}
+
+#[derive(Clone)]
+pub struct Cache<T> {
+    // Can run longer
+    last_updated: Instant,
+    data: T,
+    ttl: Duration,
+}
+
+impl Cache<ImplementingCountries> {
+    async fn is_fresh(&self) -> bool {
+        return &self.last_updated.elapsed() <= &self.ttl;
+    }
+    async fn update(&mut self) {
+        // TODO: Add proper error handling
+        self.data = external_data::get_implementing_countries().await.unwrap();
+        self.last_updated = Instant::now();
+    }
+    // Update Data if needed, when accessed
+    async fn get(&mut self) -> &ImplementingCountries {
+        if self.is_fresh().await {
+            return &self.data;
+        } else {
+            self.update().await;
+            return &self.data;
+        }
+    }
+}
+
+//impl Default for Cache<ImplementingCountries> {
+//    fn default() -> Self {
+//        Cache {
+//            last_updated: Instant::now(),
+//            //data: ImplementingCountries { countries: HashSet::new() },
+//            //data: tokio::spawn(async { external_data::get_implementing_countries() }).,
+//            data: {
+//                let rt = Runtime::new().unwrap();
+//                let handle = rt.handle();
+//                handle.spawn(external_data::get_implementing_countries()).await.unwrap().unwrap()
+//            },
+//        }
+//    }
 //}
