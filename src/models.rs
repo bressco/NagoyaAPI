@@ -108,8 +108,18 @@ pub struct AppState {
 }
 
 impl AppState {
+    pub fn new(config: Config, countries: ImplementingCountries, ttl: Duration) -> Self {
+        Self {
+            config,
+            implementing_countries: Cache {
+                last_updated: Instant::now(),
+                ttl,
+                data: countries,
+            },
+        }
+    }
     // Returns the current version of implementing countries; fetching a new one, if needed
-    async fn implementing_countries(&mut self) -> &ImplementingCountries {
+    pub async fn implementing_countries(&mut self) -> &ImplementingCountries {
         self.implementing_countries.get().await
     }
 }

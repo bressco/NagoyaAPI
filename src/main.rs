@@ -5,6 +5,7 @@
 use crate::models::{AppState, Config, ImplementingCountries};
 use axum::Router;
 use axum::routing::{get, post};
+use std::time::Duration;
 use tower_http::trace::TraceLayer;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -13,6 +14,7 @@ mod api;
 mod external_data;
 mod models;
 mod nagoya_check;
+mod sdo_models;
 
 #[derive(OpenApi)]
 #[openapi(paths(
@@ -50,10 +52,14 @@ async fn main() {
         server_port,
     };
 
-    let state = AppState {
+    let state = AppState::new(
+        config.clone(),
         implementing_countries,
-        config: config.clone(),
-    };
+        Duration::new(
+            dotenvy::var("CACHE_TTL").unwrap().parse::<u64>().unwrap(),
+            0,
+        ),
+    );
 
     let listener = tokio::net::TcpListener::bind(format!(
         "{host}:{port}",
