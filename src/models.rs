@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::time::Duration;
 use tokio::time::Instant;
+use tracing::{Level, span};
 use utoipa::{IntoParams, IntoResponses, ToSchema};
 
 // API
@@ -75,7 +76,7 @@ pub struct ImplementingCountries {
 
 impl FromRef<AppState> for ImplementingCountries {
     fn from_ref(app_state: &AppState) -> ImplementingCountries {
-        app_state.implementing_countries.clone()
+        app_state.implementing_countries.data.clone()
     }
 }
 
@@ -134,21 +135,24 @@ pub struct Cache<T> {
 
 impl Cache<ImplementingCountries> {
     async fn is_fresh(&self) -> bool {
-        return &self.last_updated.elapsed() <= &self.ttl;
+        self.last_updated.elapsed() <= self.ttl
     }
     async fn update(&mut self) {
+        let span = span!(Level::INFO, "Updating cached data");
+        let _enter = span.enter();
         // TODO: Add proper error handling
         self.data = external_data::get_implementing_countries().await.unwrap();
         self.last_updated = Instant::now();
     }
-    // Update Data if needed, when accessed
+    // When the data is accessed, check whether it is fresh. If it is fresh, just return
+    // the data. If not, update it and then return the data
     async fn get(&mut self) -> &ImplementingCountries {
-        if self.is_fresh().await {
-            return &self.data;
+        return if self.is_fresh().await {
+            &self.data
         } else {
             self.update().await;
-            return &self.data;
-        }
+            &self.data
+        };
     }
 }
 
