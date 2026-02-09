@@ -27,7 +27,7 @@ pub struct NagoyaCheckDataGeo {
     pub(crate) coordinates: Coordinates,
 }
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Deserialize, ToSchema, Debug)]
 pub struct Coordinates {
     pub(crate) latitude: f64,
     pub(crate) longitude: f64,
@@ -69,7 +69,7 @@ pub struct Treaty {
 }
 
 // Internal
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct ImplementingCountries {
     pub(crate) countries: HashSet<String>,
 }
@@ -89,7 +89,7 @@ pub struct NominatimResponse {
     pub(crate) address: NominatimAddress,
 }
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Deserialize, Debug)]
 pub struct Config {
     pub nominatim_host: String,
     pub server_host: String,

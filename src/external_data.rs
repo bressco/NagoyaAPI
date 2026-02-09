@@ -8,7 +8,9 @@ use crate::models::{
 use reqwest::Client;
 use std::collections::HashSet;
 use std::error::Error;
+use tracing::{Level, event, instrument, span};
 
+#[instrument]
 async fn fetch_absch_treaty_info() -> String {
     // Creates a new client on each call. As this call should happen rarely due to caching, this
     // should be ok
@@ -41,10 +43,13 @@ async fn fetch_absch_treaty_info() -> String {
     // At least, if the fetching fails repeatedly, maybe configurable in .env
 }
 
+#[instrument]
 pub async fn fetch_country_code_by_coordinates(
     config: &Config,
     coordinates: Coordinates,
 ) -> Result<String, Box<dyn Error + Send + Sync>> {
+    let span = span!(Level::DEBUG, "Resolving coordinates to country code");
+    let _enter = span.enter();
     let request = format!(
         "{host}{endpoint}?lat={lat}&lon={lon}&format=json",
         //env_map.get("NOMINATIM_HOST").unwrap(),
@@ -54,21 +59,31 @@ pub async fn fetch_country_code_by_coordinates(
         lon = coordinates.longitude
     );
 
-    // TODO: Move client to state to avoid rebuilding
-    static APP_USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"),);
+    const APP_USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"),);
     let client = Client::builder()
         .user_agent(APP_USER_AGENT) // API requires UA for interaction
         .build()?;
     let nominatim_res = client.get(request).send().await?.text().await?;
     let nominatim_json: NominatimResponse = serde_json::from_str(&nominatim_res)?;
+
+    event!(
+        Level::DEBUG,
+        "Resolved {}, {} to \"{}\"",
+        &coordinates.latitude,
+        &coordinates.longitude,
+        &nominatim_json.address.country_code
+    );
+
     Ok(nominatim_json.address.country_code) // returns a code 2, needs to be converted to a code 3
 }
 
+#[instrument]
 fn get_nagoya_treaty_info(absch_json: &str) -> Result<HashSet<NagoyaCountryInfo>, Box<dyn Error>> {
     let v: HashSet<NagoyaCountryInfo> = serde_json::from_str(absch_json)?;
     Ok(v)
 }
 
+#[instrument]
 pub async fn get_implementing_countries() -> Result<ImplementingCountries, Box<dyn Error>> {
     // TODO: Use Caching
     // TODO: Instead of strings, use the data model provided by the iso3166 crate (or return a fitting error)
