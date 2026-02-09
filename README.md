@@ -25,11 +25,13 @@ Configuration
 
 The Service can be configured using a .env file.
 
-| Option         | Type        | Default | Required? | Description                                            |
-|----------------|-------------|---------|-----------|--------------------------------------------------------| 
-| SERVER_HOST    | IP Address  | 0.0.0.0 | Yes       | IP address to bind the server to                       |
-| SERVER_PORT    | Port Number | 3125    | Yes       | Port to bind the server to                             |
-| NOMINATIM_HOST | URL         | None    | Yes       | (External) Nominatim Host to use for reverse geocoding |
+| Option         | Type                              | Default | Required? | Description                                            |
+|----------------|-----------------------------------|---------|-----------|--------------------------------------------------------| 
+| SERVER_HOST    | IP Address                        | 0.0.0.0 | No        | IP address to bind the server to                       |
+| SERVER_PORT    | Port Number                       | 3125    | No        | Port to bind the server to                             |
+| NOMINATIM_HOST | URL                               | None    | Yes       | (External) Nominatim Host to use for reverse geocoding |
+| CACHE_TTL      | String                            | 1 day   | No        | Cache TTL in Seconds                                   |
+| LOG_LEVEL      | {ERROR, WARN, INFO, DEBUG, TRACE} | INFO    | No        | Log Level to use                                       | 
 
 Usage
 ---
