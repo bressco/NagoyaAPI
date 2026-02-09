@@ -68,7 +68,10 @@ async fn main() {
         config.clone(),
         implementing_countries,
         Duration::new(
-            dotenvy::var("CACHE_TTL").unwrap().parse::<u64>().unwrap(),
+            dotenvy::var("CACHE_TTL")
+                .unwrap_or("86400".to_string())
+                .parse::<u64>()
+                .expect("Could not parse TTL to u64"),
             0,
         ),
     );
