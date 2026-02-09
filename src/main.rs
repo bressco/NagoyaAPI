@@ -14,7 +14,6 @@ mod api;
 mod external_data;
 mod models;
 mod nagoya_check;
-mod sdo_models;
 
 #[derive(OpenApi)]
 #[openapi(paths(
