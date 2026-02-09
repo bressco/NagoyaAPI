@@ -46,7 +46,7 @@ pub async fn nagoya_check_country_code(
 pub async fn nagoya_check_geocoordinates(
     //State(implementing_countries): State<ImplementingCountries>,
     //State(config): State<Config>,
-    State(state): State<AppState>,
+    State(mut state): State<AppState>,
     Json(payload): Json<NagoyaCheckDataGeo>,
 ) -> Result<Json<NagoyaResponse>, axum::http::StatusCode> {
     // TODO: Explicit error handling via match here?
@@ -54,7 +54,7 @@ pub async fn nagoya_check_geocoordinates(
     //Ok(nagoya_check_geo(payload.coordinates, &implementing_countries, &config).await?)
     match nagoya_check_geo(
         payload.coordinates,
-        &state.implementing_countries,
+        &state.implementing_countries().await.clone(),
         &state.config,
     )
     .await
