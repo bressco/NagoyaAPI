@@ -6,22 +6,29 @@ use crate::external_data::fetch_country_code_by_coordinates;
 use crate::models::{Config, Coordinates, ImplementingCountries, NagoyaResponse};
 use axum::Json;
 use std::error::Error;
+use tracing::{Level, event, instrument, span};
 
+#[instrument(skip(implementing_countries))]
 pub async fn nagoya_check_cc(
     probe_country: String,
     implementing_countries: &ImplementingCountries,
 ) -> Result<Json<NagoyaResponse>, Box<dyn Error + Send + Sync>> {
+    let span = span!(Level::DEBUG, "Lookup via Country Code");
+    let _enter = span.enter();
     Ok(Json(NagoyaResponse {
         check_result: is_probe_in_implementing_country(implementing_countries, &probe_country)
             .await?,
     }))
 }
 
+#[instrument(skip(implementing_countries))]
 pub async fn nagoya_check_geo(
     coordinates: Coordinates,
     implementing_countries: &ImplementingCountries,
     config: &Config, // Host meaningless here, so unpacked just before use
 ) -> Result<Json<NagoyaResponse>, Box<dyn Error + Send + Sync>> {
+    let span = span!(Level::DEBUG, "Lookup via Geocoordinates");
+    let _enter = span.enter();
     nagoya_check_cc(
         // TODO: Add error handling for failing fetch
         fetch_country_code_by_coordinates(config, coordinates).await?,
@@ -30,11 +37,17 @@ pub async fn nagoya_check_geo(
     .await
 }
 
+#[instrument]
 async fn is_probe_in_implementing_country(
     implementing_countries: &ImplementingCountries,
     probe_country: &str,
 ) -> Result<bool, Box<dyn Error + Send + Sync>> {
     // Check whether probe country is in list of implementing countries
+    event!(
+        Level::DEBUG,
+        "Checking whether \"{}\" is implementing the Nagoya Protocol",
+        &probe_country
+    );
     let probe_country_code3: &str;
     if probe_country.len() == 3 {
         probe_country_code3 = rust_iso3166::from_alpha3(&probe_country.to_uppercase())

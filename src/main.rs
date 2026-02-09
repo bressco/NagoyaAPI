@@ -7,6 +7,7 @@ use axum::Router;
 use axum::routing::{get, post};
 use std::time::Duration;
 use tower_http::trace::TraceLayer;
+use tracing::{Level, event};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -51,6 +52,18 @@ async fn main() {
         server_port,
     };
 
+    let log_level = match dotenvy::var("LOG_LEVEL")
+        .unwrap_or("INFO".to_string())
+        .as_str()
+    {
+        "TRACE" => Level::TRACE,
+        "DEBUG" => Level::DEBUG,
+        "INFO" => Level::INFO,
+        "WARN" => Level::WARN,
+        "ERROR" => Level::ERROR,
+        _ => Level::INFO,
+    };
+
     let state = AppState::new(
         config.clone(),
         implementing_countries,
@@ -77,10 +90,14 @@ async fn main() {
         .with_state(state)
         .layer(TraceLayer::new_for_http());
 
-    tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::DEBUG)
-        .init();
+    tracing_subscriber::fmt().with_max_level(log_level).init();
 
+    event!(
+        Level::INFO,
+        "server listening on {}, port {}",
+        server_address,
+        server_port
+    );
     axum::serve(listener, app).await.unwrap();
 }
 
