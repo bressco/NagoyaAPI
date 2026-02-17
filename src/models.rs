@@ -5,6 +5,7 @@
 use crate::external_data;
 use axum::extract::FromRef;
 use serde::{Deserialize, Serialize};
+use snafu::Snafu;
 use std::collections::HashSet;
 use std::time::Duration;
 use tokio::time::Instant;
@@ -154,6 +155,12 @@ impl Cache<ImplementingCountries> {
             &self.data
         };
     }
+}
+
+#[derive(Debug, Snafu, PartialEq)]
+pub enum NagoyaError {
+    #[snafu(display("Malformed country code"))]
+    MalformedCountryCode,
 }
 
 //impl Default for Cache<ImplementingCountries> {
