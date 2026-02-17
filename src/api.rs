@@ -5,7 +5,7 @@
 use crate::ApiDoc;
 use crate::models::{
     AppState, GenericResponse, ImplementingCountries, NagoyaCheckDataCC, NagoyaCheckDataGeo,
-    NagoyaResponse,
+    NagoyaError, NagoyaResponse,
 };
 use crate::nagoya_check::{nagoya_check_cc, nagoya_check_geo};
 use axum::Json;
@@ -18,18 +18,18 @@ use utoipa::OpenApi;
     path = "/nagoya_check_cc",
     request_body = NagoyaCheckDataCC,
     responses(
-    (status = 200, description = "Result of the compliance check", body = NagoyaResponse),
-    (status = 500, description = "Internal Server Error")
+        (status = 200, description = "Result of the compliance check", body = NagoyaResponse),
+        (status = 422, description = "Could not process input, possibly illegal country code"),
+        (status = 502)
     )
 )]
 pub async fn nagoya_check_country_code(
     State(implementing_countries): State<ImplementingCountries>,
     Json(payload): Json<NagoyaCheckDataCC>,
 ) -> Result<Json<NagoyaResponse>, axum::http::StatusCode> {
-    // TODO: Check for valid country code before passing on the data
-    // TODO: Ensure that comparison happens with the same case
     match nagoya_check_cc(payload.probe_country, &implementing_countries).await {
         Ok(res) => Ok(res),
+        Err(NagoyaError::MalformedCountryCode) => Err(axum::http::StatusCode::UNPROCESSABLE_ENTITY),
         Err(_) => Err(axum::http::StatusCode::INTERNAL_SERVER_ERROR),
     }
 }
@@ -39,8 +39,9 @@ pub async fn nagoya_check_country_code(
     path = "/nagoya_check_geo",
     request_body = NagoyaCheckDataGeo,
     responses(
-    (status=200, description ="Result of the compliance check", body = NagoyaResponse),
-    (status = 500, description = "Internal Server Error")
+        (status = 200, description ="Result of the compliance check", body = NagoyaResponse),
+        (status = 500, description = "Internal Server Error"),
+        (status = 502, description = "Bad Gateway")
     )
 )]
 pub async fn nagoya_check_geocoordinates(
@@ -60,6 +61,7 @@ pub async fn nagoya_check_geocoordinates(
     .await
     {
         Ok(res) => Ok(res),
+        Err(NagoyaError::UnresolvableCoordinates) => Err(axum::http::StatusCode::BAD_GATEWAY),
         Err(_) => Err(axum::http::StatusCode::INTERNAL_SERVER_ERROR),
     }
 }

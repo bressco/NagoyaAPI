@@ -161,6 +161,8 @@ impl Cache<ImplementingCountries> {
 pub enum NagoyaError {
     #[snafu(display("Malformed country code"))]
     MalformedCountryCode,
+    #[snafu(display("Could not resolve Geocoordinates"))]
+    UnresolvableCoordinates,
 }
 
 //impl Default for Cache<ImplementingCountries> {
