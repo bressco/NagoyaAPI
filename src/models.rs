@@ -163,6 +163,14 @@ pub enum NagoyaError {
     MalformedCountryCode,
     #[snafu(display("Could not resolve Geocoordinates"))]
     UnresolvableCoordinates,
+    // TODO: Auf internal server error mappen nach außen, aber verschieden wegloggen?
+    // Für User bis auf maybe temporär eigentlich egal
+    #[snafu(display("External Resource unreachable"))]
+    UnreachableExternalResource,
+    #[snafu(display("Could not parse external response"))]
+    UnparsableExternalResponse,
+    #[snafu(display("Internal Server Error"))]
+    GenericInternalServerError,
 }
 
 //impl Default for Cache<ImplementingCountries> {
