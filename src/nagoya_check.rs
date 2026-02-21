@@ -31,13 +31,12 @@ pub async fn nagoya_check_geo(
     let span = span!(Level::DEBUG, "Lookup via Geocoordinates");
     let _enter = span.enter();
     nagoya_check_cc(
-        fetch_country_code_by_coordinates(config, coordinates)
-            .await
-            // Let's stick with this instead of differentiating between malformed coordinates and
-            // external service not reachable. Either way the external service tells us both
-            // If reverse lookup is not possible, nominatim returns {"error":"Unable to geocode"}
-            // with Status 200
-            .map_err(|_| NagoyaError::UnresolvableCoordinates)?,
+        fetch_country_code_by_coordinates(config, coordinates).await?,
+        // Let's stick with this instead of differentiating between malformed coordinates and
+        // external service not reachable. Either way the external service tells us both
+        // If reverse lookup is not possible, nominatim returns {"error":"Unable to geocode"}
+        // with Status 200
+        //.map_err(|_| NagoyaError::UnresolvableCoordinates)?,
         implementing_countries,
     )
     .await

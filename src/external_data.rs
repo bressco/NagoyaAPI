@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 use crate::models::{
-    Config, Coordinates, ImplementingCountries, NagoyaCountryInfo, NominatimResponse,
+    Config, Coordinates, ImplementingCountries, NagoyaCountryInfo, NagoyaError, NominatimResponse,
 };
 use reqwest::Client;
 use std::collections::HashSet;
@@ -47,7 +47,8 @@ async fn fetch_absch_treaty_info() -> String {
 pub async fn fetch_country_code_by_coordinates(
     config: &Config,
     coordinates: Coordinates,
-) -> Result<String, Box<dyn Error + Send + Sync>> {
+    //) -> Result<String, Box<dyn Error + Send + Sync>> {
+) -> Result<String, NagoyaError> {
     let span = span!(Level::DEBUG, "Resolving coordinates to country code");
     let _enter = span.enter();
     let request = format!(
@@ -62,9 +63,22 @@ pub async fn fetch_country_code_by_coordinates(
     const APP_USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"),);
     let client = Client::builder()
         .user_agent(APP_USER_AGENT) // API requires UA for interaction
-        .build()?;
-    let nominatim_res = client.get(request).send().await?.text().await?;
-    let nominatim_json: NominatimResponse = serde_json::from_str(&nominatim_res)?;
+        .build()
+        .map_err(|_| NagoyaError::GenericInternalServerError)?;
+    let nominatim_res = client
+        .get(request)
+        .send()
+        .await
+        .map_err(|_| NagoyaError::UnreachableExternalResource)?
+        .text()
+        .await
+        .map_err(|_| NagoyaError::UnparsableExternalResponse)?;
+    let nominatim_json: NominatimResponse = serde_json::from_str(&nominatim_res)
+        .map_err(|_| NagoyaError::UnparsableExternalResponse)?;
+    // TODO: Handle for failed to parse
+    // If reverse lookup is not possible, nominatim returns {"error":"Unable to geocode"}
+    // with Status 200
+    // Is Unresolvable Coordinates
 
     event!(
         Level::DEBUG,
